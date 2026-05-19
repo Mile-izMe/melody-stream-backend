@@ -1,12 +1,12 @@
 import {
-    Args,
-    Mutation,
-    Query,
-    Resolver,
-} from "@nestjs/graphql"
+    GraphQLSuccessMessage,
+    GraphQLTransformInterceptor,
+} from "@modules/api"
 import {
+    CheckPermissions,
     CurrentUser,
     JwtAuthGuard,
+    PermissionName,
     PermissionsGuard,
 } from "@modules/common"
 import {
@@ -17,9 +17,11 @@ import {
     UseInterceptors,
 } from "@nestjs/common"
 import {
-    GraphQLSuccessMessage,
-    GraphQLTransformInterceptor,
-} from "@modules/api"
+    Args,
+    Mutation,
+    Query,
+    Resolver,
+} from "@nestjs/graphql"
 import {
     CreatePermissionRequest,
     CreatePermissionResponse,
@@ -31,11 +33,6 @@ import {
     CreateRolePermissionService,
 } from "./mutations/create-role-permission"
 import {
-    GetRolesResponse,
-    GetRolesResponseData,
-    GetRolesService,
-} from "./queries/get-roles"
-import {
     GetPermissionsResponse,
     GetPermissionsResponseData,
     GetPermissionsService,
@@ -45,6 +42,11 @@ import {
     GetPermissionsByRoleResponseData,
     GetPermissionsByRoleService,
 } from "./queries/get-permissions-by-role"
+import {
+    GetRolesResponse,
+    GetRolesResponseData,
+    GetRolesService,
+} from "./queries/get-roles"
 import {
     GetUserPermissionsResponse,
     GetUserPermissionsResponseData,
@@ -63,6 +65,7 @@ export class PermissionsResolver {
         private readonly getPermissionsByRoleService: GetPermissionsByRoleService,
     ) {}
 
+    @CheckPermissions(PermissionName.GetRole)
     @GraphQLSuccessMessage({
         [Locale.En]: "Roles fetched successfully",
         [Locale.Vi]: "Lấy danh sách roles thành công",
@@ -79,6 +82,7 @@ export class PermissionsResolver {
         return this.getRolesService.execute()
     }
 
+    @CheckPermissions(PermissionName.GetAllPermissions)
     @GraphQLSuccessMessage({
         [Locale.En]: "Permissions fetched successfully",
         [Locale.Vi]: "Lấy danh sách permissions thành công",
@@ -95,28 +99,25 @@ export class PermissionsResolver {
         return this.getPermissionsService.execute()
     }
 
+    @CheckPermissions(PermissionName.GetPermissionByRole)
     @GraphQLSuccessMessage({
-        [Locale.En]: "Permissions by role fetched successfully",
-        [Locale.Vi]: "Lấy danh sách permissions theo role thành công",
+        [Locale.En]: "Role permission summaries fetched successfully",
+        [Locale.Vi]: "Lấy danh sách tổng hợp permissions theo role thành công",
     })
     @UseInterceptors(GraphQLTransformInterceptor)
     @Query(
         () => GetPermissionsByRoleResponse,
         {
-            name: "permissionsByRoleId",
-            description: "Lists all permissions assigned to a role.",
+            name: "permissionsByRole",
+            description: "Lists each role with its permissions and counts of permissions and users.",
         },
     )
-    async permissionsByRoleId(
-        @Args("roleId", {
-            type: () => String,
-            description: "Role identifier.",
-        })
-            roleId: string,
+    async permissionsByRole(
     ): Promise<GetPermissionsByRoleResponseData> {
-        return this.getPermissionsByRoleService.execute(roleId)
+        return this.getPermissionsByRoleService.execute()
     }
 
+    @CheckPermissions(PermissionName.GetUserPermissions)
     @GraphQLSuccessMessage({
         [Locale.En]: "User permissions fetched successfully",
         [Locale.Vi]: "Lấy danh sách permissions của tất cả users thành công",
@@ -133,6 +134,7 @@ export class PermissionsResolver {
         return this.getUserPermissionsService.execute()
     }
 
+    @CheckPermissions(PermissionName.CreatePermissions)
     @Mutation(
         () => CreatePermissionResponse,
         {
@@ -162,6 +164,7 @@ export class PermissionsResolver {
         }
     }
 
+    @CheckPermissions(PermissionName.CreateRolePermissions)
     @Mutation(
         () => CreateRolePermissionResponse,
         {

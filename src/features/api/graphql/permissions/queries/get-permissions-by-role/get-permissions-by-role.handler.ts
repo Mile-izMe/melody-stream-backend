@@ -18,6 +18,7 @@ import {
     GetPermissionsByRoleResponseData,
 } from "./types"
 import {
+    toRoleItem,
     toPermissionItem,
 } from "../../types"
 
@@ -33,23 +34,54 @@ export class GetPermissionsByRoleHandler
     }
 
     protected override async process(
-        query: GetPermissionsByRoleQuery,
     ): Promise<GetPermissionsByRoleResponseData> {
-        const permissions = await this.prisma.permission.findMany({
-            where: {
-                roles: {
-                    some: {
-                        roleId: query.params.roleId,
-                    },
-                },
-            },
+        const roles = await this.prisma.role.findMany({
             orderBy: {
                 name: "asc",
+            },
+            include: {
+                users: {
+                    include: {
+                        user: {
+                            select: {
+                                username: true,
+                                email: true,
+                            },
+                        },
+                    },
+                },
+                permissions: {
+                    include: {
+                        permission: true,
+                    },
+                    orderBy: {
+                        permission: {
+                            name: "asc",
+                        },
+                    },
+                },
             },
         })
 
         return {
-            permissions: permissions.map(toPermissionItem),
+            roles: roles.map((role) => {
+                const permissions = role.permissions.map((item) => toPermissionItem(item.permission))
+                const users = role.users
+                    .map((item) => ({
+                        username: item.user.username,
+                        email: item.user.email,
+                    }))
+                    .sort((a,
+                        b) => a.username.localeCompare(b.username))
+
+                return {
+                    role: toRoleItem(role),
+                    permissions,
+                    users,
+                    permissionCount: permissions.length,
+                    userCount: role.users.length,
+                }
+            }),
         }
     }
 }
