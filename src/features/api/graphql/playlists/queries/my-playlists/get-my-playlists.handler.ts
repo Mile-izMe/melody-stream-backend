@@ -86,6 +86,11 @@ export class GetMyPlaylistsHandler
                             songs: true,
                         },
                     },
+                    songs: {
+                        include: {
+                            song: true,
+                        },
+                    },
                 },
             }),
             this.prisma.playlist.count({

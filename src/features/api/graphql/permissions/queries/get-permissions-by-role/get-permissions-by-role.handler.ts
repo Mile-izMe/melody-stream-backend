@@ -48,9 +48,6 @@ export class GetPermissionsByRoleHandler
             },
         })
 
-        console.log(permissions)
-        
-
         return {
             permissions: permissions.map(toPermissionItem),
         }

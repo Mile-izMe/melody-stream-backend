@@ -53,6 +53,11 @@ export class PlaylistCreateHandler
                         songs: true,
                     },
                 },
+                songs: {
+                    include: {
+                        song: true,
+                    },
+                },
             },
         })
 

@@ -100,6 +100,11 @@ export class PlaylistAddSongHandler
                         songs: true,
                     },
                 },
+                songs: {
+                    include: {
+                        song: true,
+                    },
+                },
             },
         })
 
