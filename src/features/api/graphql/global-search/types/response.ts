@@ -1,27 +1,49 @@
-// import {
-//     Field, ObjectType 
-// } from "@nestjs/graphql"
-// import {
-//     PlaylistResponseData 
-// } from "../playlists/types"
-// import {
-//     SongsResponseDataObject 
-// } from "../../songs/queries/songs/types"
+import {
+    AbstractGraphQLResponse,
+} from "@modules/api"
+import {
+    Field,
+    ObjectType,
+} from "@nestjs/graphql"
+import {
+    SongItem,
+} from "../../songs/types"
+import {
+    PlaylistItem,
+} from "../../playlists/types"
+import {
+    UserItem,
+} from "../../user/queries/shared/user-item"
 
-// @ObjectType()
-// export class GlobalSearchResponseData {
-//     @Field(() => [SongsResponseDataObject], {
-//         description: "Danh sách bài hát tìm được" 
-//     })
-//         songs: SongsResponseDataObject[]
+@ObjectType()
+export class GlobalSearchResultDataObject {
+    @Field(() => [SongItem], {
+        description: "List of songs found",
+    })
+        songs: SongItem[]
 
-//     @Field(() => [UserResponseData], {
-//         description: "Danh sách nghệ sĩ/người dùng tìm được" 
-//     })
-//         users: UserResponseData[]
+    @Field(() => [PlaylistItem], {
+        description: "List of playlists found",
+    })
+        playlists: PlaylistItem[]
 
-//     @Field(() => [PlaylistResponseData], {
-//         description: "Danh sách danh sách phát tìm được" 
-//     })
-//         playlists: PlaylistResponseData[]
-// }
+    @Field(() => [UserItem], {
+        description: "List of users found",
+    })
+        users: UserItem[]
+}
+
+@ObjectType()
+export class GlobalSearchResponse extends AbstractGraphQLResponse {
+    @Field(() => GlobalSearchResultDataObject, {
+        nullable: true,
+    })
+        data?: GlobalSearchResultDataObject | null
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export interface GlobalSearchResponseData {
+    songs: Array<any>
+    playlists: Array<any>
+    users: Array<any>
+}

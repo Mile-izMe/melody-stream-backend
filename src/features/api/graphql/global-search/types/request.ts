@@ -1,28 +1,20 @@
-// // global-search.types.ts
-// import {
-//     Field, ObjectType 
-// } from "@nestjs/graphql"
-// import {
-//     PlaylistResponseData 
-// } from "../playlists/types"
-// import {
-//     SongsResponseDataObject 
-// } from "../../songs/queries/songs/types"
+import {
+    Field,
+    InputType,
+} from "@nestjs/graphql"
 
-// @ObjectType()
-// export class GlobalSearchResponseData {
-//     @Field(() => [SongsResponseDataObject], {
-//         description: "Danh sách bài hát tìm được" 
-//     })
-//         songs: SongsResponseDataObject[]
+@InputType({
+    description: "Request for global search across songs, playlists.",
+})
+export class GlobalSearchRequest {
+    @Field(() => String, {
+        description: "Keyword to search for.",
+    })
+        keyword: string
 
-//     @Field(() => [UserResponseData], {
-//         description: "Danh sách nghệ sĩ/người dùng tìm được" 
-//     })
-//         users: UserResponseData[]
-
-//     @Field(() => [PlaylistResponseData], {
-//         description: "Danh sách danh sách phát tìm được" 
-//     })
-//         playlists: PlaylistResponseData[]
-// }
+    @Field(() => Number, {
+        nullable: true,
+        description: "Maximum number of results per entity.",
+    })
+        limit?: number
+}

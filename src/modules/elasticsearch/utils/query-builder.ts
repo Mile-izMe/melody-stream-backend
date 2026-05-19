@@ -24,12 +24,32 @@ export class ElasticsearchQueryBuilder {
 
         if (search && searchFields.length > 0) {
             query.bool!.must = Array.isArray(query.bool!.must) ? query.bool!.must : [query.bool!.must as estypes.QueryDslQueryContainer]
-            query.bool!.must.push({
+
+            // Build a combined query: include both a fuzzy multi_match and a
+            // bool_prefix multi_match so that short prefix searches (e.g.
+            // "HIEU" -> "HIEUTHUHAI") and longer fuzzy searches both work.
+            const fuzzyMatch: any = {
                 multi_match: {
                     query: search,
                     fields: searchFields,
                     fuzziness: "AUTO",
                     operator: "and",
+                },
+            }
+
+            const prefixMatch: any = {
+                multi_match: {
+                    query: search,
+                    fields: searchFields,
+                    type: "bool_prefix",
+                    operator: "and",
+                },
+            }
+
+            query.bool!.must.push({
+                bool: {
+                    should: [fuzzyMatch, prefixMatch],
+                    minimum_should_match: 1,
                 },
             })
         }
